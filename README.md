@@ -1,4 +1,4 @@
-# CognAttendance - Face Recognition Attendance System
+# Attendance - Face Recognition Attendance System
 
 CognAttendance is a student attendance management system that uses facial recognition technology to track and record student attendance. Built with Python, Flask, and OpenCV, this system provides an efficient and automated way to manage student attendance using facial biometrics.
 
@@ -254,4 +254,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Face recognition powered by the `face_recognition` library
 - Web framework provided by Flask
 - Desktop GUI built with Tkinter
+
 - Production server using Waitress
