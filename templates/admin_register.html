@@ -1,0 +1,397 @@
+{% extends 'admin_layout.html' %}
+
+{% block title %}Register New Student - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card admin-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-user-plus mr-2"></i> Register New Student</h5>
+            </div>
+            <div class="card-body">
+                <form id="register-form" method="post" enctype="multipart/form-data" novalidate>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <div class="form-label-group">
+                                <input type="text" id="name" name="name" class="form-control" placeholder="Name" required>
+                                <label for="name">Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="form-label-group">
+                                <input type="text" id="faculty" name="faculty" class="form-control" placeholder="Faculty">
+                                <label for="faculty">Faculty</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                             <div class="form-label-group">
+                                <input type="date" id="dob" name="dob" class="form-control" placeholder="Date of Birth">
+                                <label for="dob">Date of Birth</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="form-label-group">
+                                <input type="email" id="email" name="email" class="form-control" placeholder="Email">
+                                <label for="email">Email</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label-group">
+                            <input type="text" id="address" name="address" class="form-control" placeholder="Address">
+                            <label for="address">Address</label>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="form-group">
+                        <label class="mb-3">Face Image</label>
+                        <div class="row align-items-center">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <button type="button" class="btn btn-outline-primary btn-block mb-3" id="openCameraBtn">
+                                    <i class="fas fa-camera mr-2"></i> Capture with Camera
+                                </button>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="face_image_file" name="face_image_file" accept="image/*">
+                                    <label class="custom-file-label" for="face_image_file">Or choose a file...</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <img id="preview" class="img-fluid" style="max-height: 180px; border-radius: 8px; display: none; border: 2px solid var(--border-color);"/>
+                                <div id="preview-placeholder" class="text-muted">
+                                    <i class="fas fa-image fa-3x"></i>
+                                    <p>Image Preview</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden field for captured image data -->
+                    <input type="hidden" name="face_image_data" id="face_image_data">
+
+                    <hr class="my-4">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-lg btn-block">
+                                <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn admin-btn text-white btn-lg btn-block">
+                                <i class="fas fa-plus-circle mr-2"></i> Register Student
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" role="dialog" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="cameraModalLabel"><i class="fas fa-camera-retro mr-2"></i> Capture Photo</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="form-group">
+                    <label for="camera-select">Select Camera:</label>
+                    <select id="camera-select" class="form-control"></select>
+                </div>
+                <div class="video-container mb-3">
+                    <video id="video" width="100%" height="auto" autoplay playsinline style="border-radius: 8px; background-color: #000;"></video>
+                </div>
+                <canvas id="canvas" style="display:none;"></canvas>
+                <div id="camera-error" class="alert alert-danger mt-3" style="display: none;">
+                    <strong>Error:</strong> <span id="error-message"></span>
+                </div>
+                <div class="camera-instructions mt-2">
+                    <p class="text-muted"><i class="fas fa-info-circle mr-1"></i> Position face in the frame and click Snap Photo</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="snap" class="btn btn-primary"><i class="fas fa-camera mr-2"></i> Snap Photo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    /* Floating Label styles */
+    .form-label-group {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    .form-label-group .form-control {
+        height: auto;
+        padding: 1.2rem 1rem;
+    }
+    .form-label-group > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        margin-bottom: 0;
+        line-height: 1.5;
+        color: #a9b3c1;
+        border: 1px solid transparent;
+        border-radius: .25rem;
+        transition: all .1s ease-in-out;
+        padding: 1.2rem 1rem;
+        pointer-events: none;
+    }
+    .form-label-group input:not(:placeholder-shown) ~ label,
+    .form-label-group input:focus ~ label {
+        top: -1.1rem;
+        left: .8rem;
+        font-size: 0.8rem;
+        color: #667eea;
+        background: white;
+        padding: 0.2rem 0.4rem;
+        width: auto;
+    }
+    /* Fix for date input label which is never empty */
+    .form-label-group input[type="date"] ~ label {
+        top: -1.1rem;
+        left: .8rem;
+        font-size: 0.8rem;
+        color: #667eea;
+        background: white;
+        padding: 0.2rem 0.4rem;
+        width: auto;
+    }
+    
+    /* Camera video styling */
+    #video {
+        max-width: 100%;
+        height: auto;
+        max-height: 60vh;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .video-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    /* Camera button styling */
+    #openCameraBtn {
+        background-color: #fff;
+        border: 1px solid #667eea;
+        color: #667eea;
+    }
+    
+    #openCameraBtn:hover {
+        background-color: #667eea;
+        color: #fff;
+    }
+    
+    /* Preview styling */
+    #preview {
+        max-height: 180px;
+        border-radius: 8px;
+        border: 2px solid #667eea;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    #preview-placeholder {
+        padding: 20px;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+    
+    #preview-placeholder i {
+        font-size: 2rem;
+        color: #6c757d;
+    }
+    
+    /* Modal styling */
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #dee2e6;
+    }
+    
+    /* Error message styling */
+    #camera-error {
+        border-radius: 5px;
+    }
+</style>
+<script>
+    (function() {
+        'use strict';
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snap = document.getElementById('snap');
+        const imageDataInput = document.getElementById('face_image_data');
+        const fileInput = document.getElementById('face_image_file');
+        const preview = document.getElementById('preview');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const cameraSelect = document.getElementById('camera-select');
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const cameraError = document.getElementById('camera-error');
+        const errorMessage = document.getElementById('error-message');
+        let currentStream;
+
+        // Function to show error messages
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            cameraError.style.display = 'block';
+        }
+
+        // Function to hide error messages
+        function hideError() {
+            cameraError.style.display = 'none';
+        }
+
+        async function getCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                cameraSelect.innerHTML = '';
+                
+                if (videoDevices.length === 0) {
+                    showError('No cameras found. Please connect a camera and refresh the page.');
+                    return;
+                }
+                
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                
+                hideError();
+            } catch (err) {
+                console.error("Error enumerating devices: ", err);
+                showError('Failed to access camera devices. Please check your browser permissions.');
+            }
+        }
+
+        async function startCamera(deviceId) {
+            // Stop any existing stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            
+            const constraints = {
+                video: { 
+                    deviceId: deviceId ? { exact: deviceId } : undefined, 
+                    width: { ideal: 1280 }, 
+                    height: { ideal: 720 } 
+                }
+            };
+            
+            try {
+                hideError();
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                let errorMsg = 'Could not access the camera. ';
+                
+                if (err.name === 'NotAllowedError') {
+                    errorMsg += 'Please ensure you have given permission to access the camera.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg += 'No camera was found. Please connect a camera.';
+                } else if (err.name === 'NotReadableError') {
+                    errorMsg += 'Camera is being used by another application.';
+                } else {
+                    errorMsg += 'Please ensure you have given permission and the camera is not in use by another app.';
+                }
+                
+                showError(errorMsg);
+            }
+        }
+
+        // Open camera modal when button is clicked
+        openCameraBtn.addEventListener('click', async function() {
+            $('#cameraModal').modal('show');
+        });
+
+        // When modal is shown, initialize camera
+        $('#cameraModal').on('shown.bs.modal', async function () {
+            await getCameras();
+            if (cameraSelect.options.length > 0) {
+                startCamera(cameraSelect.value);
+            }
+        });
+
+        // When modal is hidden, stop camera
+        $('#cameraModal').on('hidden.bs.modal', function () {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            hideError();
+        });
+
+        // Change camera when selection changes
+        cameraSelect.addEventListener('change', () => {
+            startCamera(cameraSelect.value);
+        });
+
+        // Capture photo
+        snap.addEventListener('click', function() {
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            imageDataInput.value = dataUrl;
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            previewPlaceholder.style.display = 'none';
+            fileInput.value = ''; // Clear file input
+            $('.custom-file-label').text('Or choose a file...');
+            $('#cameraModal').modal('hide');
+        });
+
+        // Handle file input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    previewPlaceholder.style.display = 'none';
+                    imageDataInput.value = ''; // Clear captured data
+                }
+                reader.readAsDataURL(file);
+                document.querySelector('.custom-file-label').innerText = file.name;
+            }
+        });
+
+        // Form validation
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            if (!imageDataInput.value && !fileInput.files[0]) {
+                e.preventDefault();
+                alert('Please capture a photo or select an image file.');
+            }
+        });
+    })();
+</script>
+{% endblock %}

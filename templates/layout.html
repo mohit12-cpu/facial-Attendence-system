@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}CognAttendance Web{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}"><i class="fas fa-user-check"></i> CognAttendance</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if session.logged_in %}
+                        <li class="nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-list-alt"></i> Attendance</a>
+                        </li>
+                        <li class="nav-item {% if request.endpoint == 'list_students' or request.endpoint == 'student_details' %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('list_students') }}"><i class="fas fa-users"></i> Students</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </li>
+                    {% else %}
+                        <!-- Only show login button if not on student pages -->
+                        {% if request.endpoint != 'student_login' and request.endpoint != 'student_attendance' %}
+                        <li class="nav-item {% if request.endpoint == 'login' %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main" class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2024 CognAttendance. All Rights Reserved.</span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+    {% block scripts %}{% endblock %}
+    
+    <script>
+    // Check if we're on a student page and modify the navbar brand behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // List of student-related endpoints
+        var studentEndpoints = ['student_login', 'student_attendance'];
+        var currentEndpoint = '{{ request.endpoint }}';
+        
+        if (studentEndpoints.includes(currentEndpoint)) {
+            var brandLink = document.querySelector('.navbar-brand');
+            if (brandLink) {
+                brandLink.href = 'javascript:void(0)';
+                brandLink.onclick = function(e) {
+                    e.preventDefault();
+                    window.location.reload();
+                };
+            }
+        }
+    });
+    </script>
+</body>
+</html>

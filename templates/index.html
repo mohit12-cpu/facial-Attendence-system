@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+</div>
+
+<!-- Stat Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">{{ total_students }}</h5>
+                        <p class="card-text">Total Students</p>
+                    </div>
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">{{ today_records }}</h5>
+                        <p class="card-text">Attendance Today</p>
+                    </div>
+                    <i class="fas fa-calendar-check fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">{{ total_records }}</h5>
+                        <p class="card-text">Total Records</p>
+                    </div>
+                    <i class="fas fa-clipboard-list fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-history mr-2"></i> Recent Attendance</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Showing the 10 most recent attendance records. For a full, searchable log, please visit the <a href="{{ url_for('list_attendance') }}">Attendance Page</a>.</p>
+        {% include '_attendance_table.html' %}
+    </div>
+</div>
+
+{% endblock %}
